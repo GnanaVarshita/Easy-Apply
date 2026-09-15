@@ -87,29 +87,42 @@ export const CompanyLinksManager: React.FC<CompanyLinksManagerProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {companyLinks.map(link => (
-                <TableRow key={link.id}>
-                  <TableCell sx={{ fontWeight: 700, color: '#0F172A' }}>{link.companyName}</TableCell>
-                  <TableCell>
-                    <Button
-                      href={link.careerUrl}
-                      target="_blank"
-                      endIcon={<LaunchIcon sx={{ fontSize: 14 }} />}
-                      sx={{ p: 0, textTransform: 'none', color: 'primary.main' }}
-                    >
-                      {link.careerUrl}
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Chip label="Active Monitoring" size="small" color="secondary" sx={{ fontWeight: 600 }} />
-                  </TableCell>
-                  <TableCell align="right">
-                    <IconButton onClick={() => onDeleteCompanyLink(link.id)} color="error" size="small">
-                      <DeleteIcon />
-                    </IconButton>
+              {companyLinks.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center" sx={{ py: 6 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600, color: '#0F172A' }}>
+                      No target company links stored in Database yet.
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      Add a company name and career page URL above to enable Cloudflare Bot monitoring.
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                companyLinks.map(link => (
+                  <TableRow key={link.id}>
+                    <TableCell sx={{ fontWeight: 700, color: '#0F172A' }}>{link.companyName}</TableCell>
+                    <TableCell>
+                      <Button
+                        href={link.careerUrl}
+                        target="_blank"
+                        endIcon={<LaunchIcon sx={{ fontSize: 14 }} />}
+                        sx={{ p: 0, textTransform: 'none', color: 'primary.main' }}
+                      >
+                        {link.careerUrl}
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Chip label="Active Monitoring" size="small" color="secondary" sx={{ fontWeight: 600 }} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton onClick={() => onDeleteCompanyLink(link.id)} color="error" size="small">
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>

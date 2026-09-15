@@ -1,6 +1,7 @@
 name = "linkedin-bot-api"
 main = "src/index.ts"
 compatibility_date = "2024-09-01"
+compatibility_flags = ["nodejs_compat"]
 
 [triggers]
 crons = ["0 * * * *"] # Runs every 1 hour automatically

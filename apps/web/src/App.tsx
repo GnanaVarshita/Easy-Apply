@@ -40,57 +40,45 @@ export default function App() {
   });
 
   // Company Links state
-  const [companyLinks, setCompanyLinks] = useState<CompanyCareerLink[]>([
-    {
-      id: 'link_1',
-      companyName: 'Trane Technologies',
-      careerUrl: 'https://tranetechnologies.com/careers',
-      isActive: true,
-      lastScannedAt: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'link_2',
-      companyName: 'Stripe',
-      careerUrl: 'https://stripe.com/jobs',
-      isActive: true,
-      lastScannedAt: new Date(Date.now() - 100 * 60 * 1000).toISOString(),
-      createdAt: new Date().toISOString()
-    }
-  ]);
+  const [companyLinks, setCompanyLinks] = useState<CompanyCareerLink[]>([]);
   const [newCompanyName, setNewCompanyName] = useState('');
   const [newCareerUrl, setNewCareerUrl] = useState('');
 
   // Applications state
-  const [applications, setApplications] = useState<ApplicationRecord[]>([
-    {
-      id: 'app_1',
-      jobId: 'job_1',
-      linkedinJobId: '3948201948',
-      title: 'Full Stack React Engineer',
-      company: 'Vercel / Next.js Team',
-      location: 'Remote',
-      status: 'APPLIED',
-      isEasyApply: true,
-      matchScore: 94,
-      yoeRequired: '2+ years',
-      appliedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'app_2',
-      jobId: 'job_2',
-      linkedinJobId: '3948201949',
-      title: 'Software Engineer - Frontend',
-      company: 'Trane Technologies',
-      location: 'Remote',
-      status: 'REDIRECTED',
-      isEasyApply: false,
-      matchScore: 96,
-      yoeRequired: '1-3 years',
-      redirectUrl: 'https://tranetechnologies.com/careers/jobs/frontend-engineer',
-      appliedAt: new Date(Date.now() - 90 * 60 * 1000).toISOString()
-    }
-  ]);
+  const [applications, setApplications] = useState<ApplicationRecord[]>([]);
+
+  // Fetch company links, applications & stats on initial load
+  React.useEffect(() => {
+    fetch('/api/company-links')
+      .then(res => res.json())
+      .then(data => {
+        if (data.companyLinks) {
+          setCompanyLinks(data.companyLinks);
+        }
+      })
+      .catch(err => console.error('Error loading company links:', err));
+
+    fetch('/api/applications')
+      .then(res => res.json())
+      .then(data => {
+        if (data.applications) {
+          setApplications(data.applications);
+        }
+      })
+      .catch(err => console.error('Error loading applications:', err));
+
+    fetch('/api/stats')
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          setStats(prev => ({
+            ...prev,
+            ...data
+          }));
+        }
+      })
+      .catch(err => console.error('Error loading stats:', err));
+  }, []);
 
   // Candidate Real Profile State: GnanaVarshita Kamisetty
   const [profile, setProfile] = useState<UserProfile>({
@@ -186,25 +174,53 @@ export default function App() {
     }
   };
 
-  const handleAddCompanyLink = (e: React.FormEvent) => {
+  const handleAddCompanyLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCompanyName || !newCareerUrl) return;
 
-    const newLink: CompanyCareerLink = {
-      id: 'link_' + Date.now(),
-      companyName: newCompanyName,
-      careerUrl: newCareerUrl,
-      isActive: true,
-      createdAt: new Date().toISOString()
-    };
+    try {
+      const res = await fetch('/api/company-links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyName: newCompanyName, careerUrl: newCareerUrl })
+      });
+      const data = await res.json();
 
-    setCompanyLinks(prev => [...prev, newLink]);
-    setNewCompanyName('');
-    setNewCareerUrl('');
+      if (data.companyLink) {
+        setCompanyLinks(prev => [...prev, data.companyLink]);
+      } else {
+        const fallbackLink: CompanyCareerLink = {
+          id: 'link_' + Date.now(),
+          companyName: newCompanyName,
+          careerUrl: newCareerUrl,
+          isActive: true,
+          createdAt: new Date().toISOString()
+        };
+        setCompanyLinks(prev => [...prev, fallbackLink]);
+      }
+    } catch (err) {
+      const fallbackLink: CompanyCareerLink = {
+        id: 'link_' + Date.now(),
+        companyName: newCompanyName,
+        careerUrl: newCareerUrl,
+        isActive: true,
+        createdAt: new Date().toISOString()
+      };
+      setCompanyLinks(prev => [...prev, fallbackLink]);
+    } finally {
+      setNewCompanyName('');
+      setNewCareerUrl('');
+    }
   };
 
-  const handleDeleteCompanyLink = (id: string) => {
-    setCompanyLinks(prev => prev.filter(l => l.id !== id));
+  const handleDeleteCompanyLink = async (id: string) => {
+    try {
+      await fetch(`/api/company-links/${id}`, { method: 'DELETE' });
+    } catch (err) {
+      console.error('Error deleting company link via API:', err);
+    } finally {
+      setCompanyLinks(prev => prev.filter(l => l.id !== id));
+    }
   };
 
   const triggerScanNow = async () => {
@@ -274,6 +290,7 @@ export default function App() {
               onFileSelect={handleFileUpload}
               onProcessExtraction={processMasterPdfExtraction}
               onTriggerScan={triggerScanNow}
+              onNavigateTab={setActiveTab}
             />
           )}
 

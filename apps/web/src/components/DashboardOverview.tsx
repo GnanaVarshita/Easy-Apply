@@ -28,6 +28,7 @@ interface DashboardOverviewProps {
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onProcessExtraction: () => void;
   onTriggerScan: () => void;
+  onNavigateTab?: (tabIndex: number) => void;
 }
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
@@ -39,13 +40,25 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   pdfUploadStatus,
   onFileSelect,
   onProcessExtraction,
-  onTriggerScan
+  onTriggerScan,
+  onNavigateTab
 }) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Paper
+            onClick={() => onNavigateTab?.(2)}
+            sx={{
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+              cursor: onNavigateTab ? 'pointer' : 'default',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': onNavigateTab ? { transform: 'translateY(-2px)', boxShadow: 3 } : {}
+            }}
+          >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', color: 'text.secondary' }}>
               <Typography variant="caption" sx={{ textTransform: 'uppercase', fontWeight: 700 }}>
                 Easy Apply Submissions
@@ -62,7 +75,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Paper
+            onClick={() => onNavigateTab?.(2)}
+            sx={{
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+              cursor: onNavigateTab ? 'pointer' : 'default',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': onNavigateTab ? { transform: 'translateY(-2px)', boxShadow: 3 } : {}
+            }}
+          >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', color: 'text.secondary' }}>
               <Typography variant="caption" sx={{ textTransform: 'uppercase', fontWeight: 700 }}>
                 Telegram Redirect Alerts
@@ -79,7 +103,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Paper
+            onClick={() => onNavigateTab?.(1)}
+            sx={{
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+              cursor: onNavigateTab ? 'pointer' : 'default',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': onNavigateTab ? { transform: 'translateY(-2px)', boxShadow: 3 } : {}
+            }}
+          >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', color: 'text.secondary' }}>
               <Typography variant="caption" sx={{ textTransform: 'uppercase', fontWeight: 700 }}>
                 Target Company Links

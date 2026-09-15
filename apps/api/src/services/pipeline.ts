@@ -86,10 +86,79 @@ export async function runJobAutomationPipeline(env: {
         const applyRes = await linkedinService.submitEasyApply(job, defaultProfile, masterResumeHtml);
         if (applyRes.success) {
           appliedCount++;
+          const record = {
+            id: 'app_' + Date.now() + '_' + appliedCount,
+            jobId: job.id,
+            linkedinJobId: job.linkedinJobId,
+            title: job.title,
+            company: job.company,
+            location: job.location,
+            status: 'APPLIED' as const,
+            isEasyApply: true,
+            matchScore: evaluation.matchScore,
+            yoeRequired: evaluation.yoeRequired,
+            appliedAt: new Date().toISOString()
+          };
+
+          if (dbUrl) {
+            try {
+              const db = createDbClient(dbUrl);
+              await db.insert(applications).values({
+                id: record.id,
+                jobId: record.jobId,
+                linkedinJobId: record.linkedinJobId,
+                title: record.title,
+                company: record.company,
+                location: record.location,
+                status: record.status,
+                isEasyApply: record.isEasyApply,
+                matchScore: record.matchScore,
+                yoeRequired: record.yoeRequired
+              });
+            } catch (dbErr) {
+              console.warn('Could not insert application to DB:', dbErr);
+            }
+          }
         }
       } else if (evaluation.action === 'REDIRECT' || !job.isEasyApply) {
         // External redirect application -> Send to Telegram
         redirectedCount++;
+        const record = {
+          id: 'app_' + Date.now() + '_' + redirectedCount,
+          jobId: job.id,
+          linkedinJobId: job.linkedinJobId,
+          title: job.title,
+          company: job.company,
+          location: job.location,
+          status: 'REDIRECTED' as const,
+          isEasyApply: false,
+          matchScore: evaluation.matchScore,
+          yoeRequired: evaluation.yoeRequired,
+          redirectUrl: job.url,
+          appliedAt: new Date().toISOString()
+        };
+
+        if (dbUrl) {
+          try {
+            const db = createDbClient(dbUrl);
+            await db.insert(applications).values({
+              id: record.id,
+              jobId: record.jobId,
+              linkedinJobId: record.linkedinJobId,
+              title: record.title,
+              company: record.company,
+              location: record.location,
+              status: record.status,
+              isEasyApply: record.isEasyApply,
+              matchScore: record.matchScore,
+              yoeRequired: record.yoeRequired,
+              redirectUrl: record.redirectUrl
+            });
+          } catch (dbErr) {
+            console.warn('Could not insert application to DB:', dbErr);
+          }
+        }
+
         if (env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID) {
           await sendTelegramRedirectNotification(
             env.TELEGRAM_BOT_TOKEN,
